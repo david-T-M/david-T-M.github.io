@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. David Torres Moreno - Portafolio Académico</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --bg-color: #f8fafc;
+            --text-color: #334155;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 { margin: 0; font-size: 2.5rem; letter-spacing: -0.05em; }
+        header p { margin: 10px 0 20px 0; font-size: 1.2rem; opacity: 0.9; }
+
+        .btn-drive {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-drive:hover { background: #2563eb; }
+
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            font-size: 1.75rem;
+        }
+
+        .about-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .timeline {
+            display: block;
+            position: relative;
+            border-left: 3px solid #cbd5e1;
+            padding-left: 20px;
+            margin-left: 10px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            border: 3px solid var(--bg-color);
+        }
+
+        .timeline-puesto { font-weight: bold; font-size: 1.2rem; color: #0f172a; margin: 0; }
+        .timeline-inst { font-style: italic; color: #64748b; margin: 2px 0 8px 0; }
+
+        .grid-logros {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card-logro {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border-top: 4px solid var(--primary-color);
+            transition: transform 0.2s;
+        }
+        .card-logro:hover { transform: translateY(-3px); }
+
+        .badge-anio {
+            background: #f1f5f9;
+            color: var(--primary-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .badge-tipo {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="perf-nombre">Cargando Perfil...</h1>
+        <p id="perf-titulo"></p>
+        <p id="perf-contacto"></p>
+        <a id="perf-drive" href="#" target="_blank" class="btn-drive" style="display:none;">📁 Documentos Probatorios</a>
+    </header>
+
+    <main>
+        <section>
+            <h2>Sobre Mí</h2>
+            <div class="about-card">
+                <p id="perf-sobremi">Cargando descripción...</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Experiencia Profesional</h2>
+            <div id="contenedor-experiencia" class="timeline">
+                </div>
+        </section>
+
+        <section>
+            <h2>Producción Científica y Logros</h2>
+            <div id="contenedor-logros" class="grid-logros">
+                </div>
+        </section>
+    </main>
+
+    <script>
+        // Configura aquí tus URLs de publicación CSV de Google Sheets
+        const URL_PERFIL = "TU_URL_CSV_PERFIL";
+        const URL_EXPERIENCIA = "TU_URL_CSV_EXPERIENCIA";
+        const URL_LOGROS = "TU_URL_CSV_PUBLICACIONES";
+
+        // Auxiliar para parsear CSV básico (maneja saltos y comas simples)
+        function parseCSV(text) {
+            const lineas = text.split("\n");
+            const encabezados = lineas[0].split(",").map(h => h.trim().replace("\r", ""));
+            return lineas.slice(1).map(linea => {
+                const columnas = linea.split(",");
+                let obj = {};
+                encabezados.forEach((h, i) => {
+                    obj[h] = columnas[i] ? columnas[i].trim().replace("\r", "") : "";
+                });
+                return obj;
+            });
+        }
+
+        // Cargar datos de Perfil
+        fetch(URL_PERFIL)
+            .then(res => res.text())
+            .then(text => {
+                const data = parseCSV(text)[0];
+                if(data) {
+                    document.getElementById('perf-nombre').innerText = data.nombre;
+                    document.getElementById('perf-titulo').innerText = data.titulo;
+                    document.getElementById('perf-contacto').innerText = "📧 Contacto: " + data.contacto;
+                    document.getElementById('perf-sobremi').innerText = data.sobre_mi;
+                    if(data.link_probatorios) {
+                        const linkBtn = document.getElementById('perf-drive');
+                        linkBtn.href = data.link_probatorios;
+                        linkBtn.style.display = 'inline-block';
+                    }
+                }
+            });
+
+        // Cargar datos de Experiencia
+        fetch(URL_EXPERIENCIA)
+            .then(res => res.text())
+            .then(text => {
+                const lista = parseCSV(text);
+                const cont = document.getElementById('contenedor-experiencia');
+                cont.innerHTML = '';
+                lista.forEach(exp => {
+                    if(!exp.puesto) return;
+                    cont.innerHTML += `
+                        <div class="timeline-item">
+                            <div class="timeline-puesto">${exp.puesto}</div>
+                            <div class="timeline-inst">${exp.institucion} | 📅 ${exp.periodo}</div>
+                            <p>${exp.descripcion}</p>
+                        </div>
+                    `;
+                });
+            });
+
+        // Cargar datos de Logros y Publicaciones
+        fetch(URL_LOGROS)
+            .then(res => res.text())
+            .then(text => {
+                const lista = parseCSV(text);
+                const cont = document.getElementById('contenedor-logros');
+                cont.innerHTML = '';
+                lista.forEach(item => {
+                    if(!item.titulo) return;
+                    let linkHtml = item.link ? `<br><br><a href="${item.link}" target="_blank" style="color:var(--secondary-color); font-size:0.9rem;">🔗 Ver Publicación</a>` : '';
+                    cont.innerHTML += `
+                        <div class="card-logro">
+                            <span class="badge-anio">${item.anio}</span>
+                            <span class="badge-tipo">${item.tipo}</span>
+                            <h4 style="margin: 10px 0 5px 0; color:#0f172a;">${item.titulo}</h4>
+                            ${linkHtml}
+                        </div>
+                    `;
+                });
+            });
+    </script>
+</body>
+</html>

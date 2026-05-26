@@ -139,7 +139,10 @@
         <h1 id="perf-nombre">Cargando Perfil...</h1>
         <p id="perf-titulo"></p>
         <p id="perf-contacto"></p>
+        <div id="contenedor-botones" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <a id="perf-drive" href="#" target="_blank" class="btn-drive" style="display:none;">📁 Documentos Probatorios</a>
+        </div>
+        <!--<a id="perf-drive" href="#" target="_blank" class="btn-drive" style="display:none;">📁 Documentos Probatorios</a>-->
     </header>
 
     <main>
@@ -157,6 +160,12 @@
         </section>
 
         <section>
+            <h2>Áreas de Docencia y Cursos Impartidos</h2>
+            <div id="contenedor-cursos" style="display: flex; flex-wrap: wrap; gap: 12px;">
+                </div>
+        </section>
+
+        <section>
             <h2>Producción Científica y Logros</h2>
             <div id="contenedor-logros" class="grid-logros">
                 </div>
@@ -165,6 +174,8 @@
 
     <script>
         // Configura aquí tus URLs de publicación CSV de Google Sheets
+        // Añade esta línea junto a las otras URLs
+        const URL_DOCENCIA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiw_yPvf-FvQkOJRK2DOJN3RBy4X9Pm9x89BSMaGka-3QrOs8YBJvjGKKrOysAbSxS1QzRVqrsltj/pub?gid=1572197149&single=true&output=csv";
         const URL_PERFIL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSaR43H2LH1JGUW8hlsKbQeSdSSFnVYBoAWjyostLFHG1WnlMfn8ahdKU7LxHUZr8YM_4nAPC35zKpQ/pub?gid=1981099277&single=true&output=csv";
         const URL_EXPERIENCIA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXiw_yPvf-FvQkOJRK2DOJN3RBy4X9Pm9x89BSMaGka-3QrOs8YBJvjGKKrOysAbSxS1QzRVqrsltj/pub?gid=213472330&single=true&output=csv";
         const URL_LOGROS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8AAL3tkFtU5y5s3JjZBj9eDj9CoWBS7RZVaAXNBBDrkHjAyUX55nYEP775im5eZqI7lGC3QRPLh8p/pub?gid=1086208951&single=true&output=csv";
@@ -249,6 +260,42 @@
                     `;
                 });
             });
+            // Cargar datos de Enlaces Académicos y Docencia
+        fetch(URL_DOCENCIA)
+            .then(res => res.text())
+            .then(text => {
+                const lista = parseCSV(text);
+                const contBotones = document.getElementById('contenedor-botones');
+                const contCursos = document.getElementById('contenedor-cursos');
+
+                lista.forEach(item => {
+                    if (!item.elemento) return;
+
+                    if (item.categoria === "Enlace Académico") {
+                        // Creamos un botón elegante para cada perfil de investigación
+                        const btn = document.createElement('a');
+                        btn.href = item.url || "#";
+                        btn.target = "_blank";
+                        btn.className = "btn-drive";
+                        // Cambiamos el color de fondo para diferenciarlo de Drive
+                        btn.style.background = "#0f172a"; 
+                        btn.style.border = "1px solid #3b82f6";
+                        btn.innerText = `🎓 ${item.elemento}`;
+                        btn.title = item.detalle;
+                        contBotones.appendChild(btn);
+                    } 
+                    else if (item.categoria === "Curso Impartido") {
+                        // Creamos tarjetas minimalistas para las materias
+                        contCursos.innerHTML += `
+                            <div style="background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid #3b82f6; min-width: 200px; flex: 1 1 calc(33% - 20px);">
+                                <strong style="color: #1e3a8a; display: block; margin-bottom: 4px;">${item.elemento}</strong>
+                                <span style="font-size: 0.85rem; color: #64748b;">${item.detalle}</span>
+                            </div>
+                        `;
+                    }
+                });
+            })
+            .catch(err => console.error("Error cargando docencia y enlaces:", err));
     </script>
 </body>
 </html>

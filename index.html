@@ -135,6 +135,7 @@
 <body>
 
     <header>
+        <img id="perf-foto" src="" alt="Foto de perfil" style="display:none; width:150px; height:150px; border-radius:50%; object-fit: cover; border: 4px solid white; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
         <h1 id="perf-nombre">Cargando Perfil...</h1>
         <p id="perf-titulo"></p>
         <p id="perf-contacto"></p>
@@ -183,6 +184,7 @@
         }
 
         // Cargar datos de Perfil
+        // Cargar datos de Perfil (Versión con foto incluida)
         fetch(URL_PERFIL)
             .then(res => res.text())
             .then(text => {
@@ -192,6 +194,14 @@
                     document.getElementById('perf-titulo').innerText = data.titulo;
                     document.getElementById('perf-contacto').innerText = "📧 Contacto: " + data.contacto;
                     document.getElementById('perf-sobremi').innerText = data.sobre_mi;
+                    
+                    // Lógica para renderizar la foto si existe en el Excel
+                    if(data.url_foto) {
+                        const fotoImg = document.getElementById('perf-foto');
+                        fotoImg.src = data.url_foto;
+                        fotoImg.style.display = 'inline-block'; // La hace visible solo si tiene URL
+                    }
+
                     if(data.link_probatorios) {
                         const linkBtn = document.getElementById('perf-drive');
                         linkBtn.href = data.link_probatorios;

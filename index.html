@@ -181,29 +181,17 @@
         const URL_LOGROS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8AAL3tkFtU5y5s3JjZBj9eDj9CoWBS7RZVaAXNBBDrkHjAyUX55nYEP775im5eZqI7lGC3QRPLh8p/pub?gid=1086208951&single=true&output=csv";
 
         // Auxiliar para parsear CSV básico (maneja saltos y comas simples)
-        // Función avanzada para parsear CSV respetando comas dentro de comillas
         function parseCSV(text) {
             const lineas = text.split("\n");
-            if (lineas.length === 0 || !lineas[0]) return [];
-            
-            // Obtenemos los encabezados de la primera fila
-            const encabezados = lineas[0].split(",").map(h => h.trim().replace(/^"|"$/g, '').replace("\r", ""));
-            
+            const encabezados = lineas[0].split(",").map(h => h.trim().replace("\r", ""));
             return lineas.slice(1).map(linea => {
-                if (!linea.trim()) return null;
-                
-                // Expresión regular mágica: separa por comas, pero ignora las comas dentro de comillas
-                const columnas = linea.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || linea.split(",");
+                const columnas = linea.split(",");
                 let obj = {};
-                
                 encabezados.forEach((h, i) => {
-                    let valor = columnas[i] ? columnas[i].trim().replace("\r", "") : "";
-                    // Limpiamos las comillas dobles sobrantes que Google Sheets añade a los extremos
-                    valor = valor.replace(/^"|"$/g, '');
-                    obj[h] = valor;
+                    obj[h] = columnas[i] ? columnas[i].trim().replace("\r", "") : "";
                 });
                 return obj;
-            }).filter(item => item !== null);
+            });
         }
 
         // Cargar datos de Perfil
